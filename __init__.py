@@ -1,4 +1,4 @@
-from typing import cast, Union
+from typing import cast, Union, Callable
 
 LTLFormula = Union[
     "LTLVariable", "LTLNot", "LTLAnd", "LTLOr", "LTLNext", "LTLEventually"
@@ -6,7 +6,7 @@ LTLFormula = Union[
 
 
 class LTLVariable:
-    def __init__(self, value: bool) -> None:
+    def __init__(self, value: Union[bool, str]) -> None:
         self.value = value
 
 
@@ -37,17 +37,22 @@ class LTLEventually:
         self.value = value
 
 
-def ltl_interpret(formula: LTLFormula) -> Union[LTLFormula, bool]:
+def ltl_interpret(
+    formula: LTLFormula, lookup: Callable[[str], bool] = lambda a: True
+) -> Union[LTLFormula, bool, str]:
     if type(formula) is LTLVariable:
-        return cast(LTLVariable, formula).value
+        value = cast(LTLVariable, formula).value
+        if type(value) is bool:
+            return value
+        return lookup(cast(str, value))
     if type(formula) is LTLNot:
-        f = ltl_interpret(cast(LTLNot, formula).value)
+        f = ltl_interpret(cast(LTLNot, formula).value, lookup)
         if type(f) is bool:
             return not f
         return LTLNot(cast(LTLFormula, f))
     if type(formula) is LTLAnd:
-        f0 = ltl_interpret(cast(LTLAnd, formula).left)
-        f1 = ltl_interpret(cast(LTLAnd, formula).right)
+        f0 = ltl_interpret(cast(LTLAnd, formula).left, lookup)
+        f1 = ltl_interpret(cast(LTLAnd, formula).right, lookup)
         if f0 is False:
             return False
         if f1 is False:
@@ -56,8 +61,8 @@ def ltl_interpret(formula: LTLFormula) -> Union[LTLFormula, bool]:
             return True
         return LTLAnd(cast(LTLFormula, f0), cast(LTLFormula, f1))
     if type(formula) is LTLOr:
-        f0 = ltl_interpret(cast(LTLOr, formula).left)
-        f1 = ltl_interpret(cast(LTLOr, formula).right)
+        f0 = ltl_interpret(cast(LTLOr, formula).left, lookup)
+        f1 = ltl_interpret(cast(LTLOr, formula).right, lookup)
         if f0 is True:
             return True
         if f1 is True:
@@ -66,10 +71,10 @@ def ltl_interpret(formula: LTLFormula) -> Union[LTLFormula, bool]:
             return False
         return LTLOr(cast(LTLFormula, f0), cast(LTLFormula, f1))
     if type(formula) is LTLNext:
-        f = ltl_interpret(cast(LTLNot, formula).value)
+        f = ltl_interpret(cast(LTLNot, formula).value, lookup)
         return f
     if type(formula) is LTLEventually:
-        f = ltl_interpret(cast(LTLNot, formula).value)
+        f = ltl_interpret(cast(LTLNot, formula).value, lookup)
         if f is True:
             return True
         if f is False:
