@@ -1,5 +1,6 @@
+from typing import List
 from hypothesis import given, strategies as st
-from ltlpy import LTLVariable, LTLNot, LTLAnd, LTLOr, LTLNext, interpret
+from ltlpy import LTLFormula, LTLVariable, LTLNot, LTLAnd, LTLOr, LTLNext, interpret
 
 
 @given(st.booleans())
@@ -35,3 +36,19 @@ def test_next(b: bool) -> None:
     f = interpret(LTLNext(LTLVariable(b)))
     assert type(f) is bool
     assert f is b
+
+
+# @given(st.lists(st.booleans()))
+# def test_eventually(lst: List[bool]) -> None:
+#     expected = any(lst)
+#     f = LTLEventually(LTLVariable(True))
+#     for _ in lst:
+#         if type(f) is not LTLFormula:
+#             break
+#         f = interpret(f)
+#     1
+
+#     while type(f) is LTLFormula
+#     f = interpret(LTLEventually(LTLVariable(True)))
+#     assert type(f) is bool
+#     assert f is b

@@ -1,6 +1,8 @@
 from typing import cast, Union
 
-LTLFormula = Union["LTLVariable", "LTLNot", "LTLAnd", "LTLOr", "LTLNext"]
+LTLFormula = Union[
+    "LTLVariable", "LTLNot", "LTLAnd", "LTLOr", "LTLNext", "LTLEventually"
+]
 
 
 class LTLVariable:
@@ -26,6 +28,11 @@ class LTLOr:
 
 
 class LTLNext:
+    def __init__(self, value: LTLFormula) -> None:
+        self.value = value
+
+
+class LTLEventually:
     def __init__(self, value: LTLFormula) -> None:
         self.value = value
 
@@ -61,5 +68,12 @@ def interpret(formula: LTLFormula) -> Union[LTLFormula, bool]:
     if type(formula) is LTLNext:
         f = interpret(cast(LTLNot, formula).value)
         return f
+    if type(formula) is LTLEventually:
+        f = interpret(cast(LTLNot, formula).value)
+        if f is True:
+            return True
+        if f is False:
+            return formula
+        return LTLOr(cast(LTLFormula, f), formula)
 
     raise Exception("Invalid formula")
