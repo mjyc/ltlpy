@@ -1,15 +1,18 @@
+from typing import List, Union, cast
+
 import pytest
-from typing import cast, List, Union
-from hypothesis import given, strategies as st
+from hypothesis import given
+from hypothesis import strategies as st
+
 from ltlpy import (
-    LTLFormula,
-    LTLVariable,
-    LTLNot,
-    LTLAnd,
-    LTLOr,
-    LTLNext,
-    LTLEventually,
     LTLAlways,
+    LTLAnd,
+    LTLEventually,
+    LTLFormula,
+    LTLNext,
+    LTLNot,
+    LTLOr,
+    LTLVariable,
     ltl_interpret,
 )
 

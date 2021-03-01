@@ -1,4 +1,4 @@
-from typing import cast, Union, Callable
+from typing import Callable, Union, cast
 
 LTLFormula = Union[
     "LTLVariable", "LTLNot", "LTLAnd", "LTLOr", "LTLNext", "LTLEventually", "LTLAlways"
