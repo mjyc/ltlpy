@@ -1,5 +1,5 @@
 from hypothesis import given, strategies as st
-from ltlpy import LTLVariable, LTLNot, LTLOr, interpret
+from ltlpy import LTLVariable, LTLNot, LTLAnd, LTLOr, interpret
 
 
 @given(st.booleans())
@@ -13,6 +13,13 @@ def test_not(b: bool) -> None:
     f = interpret(LTLNot(LTLVariable(b)))
     assert type(f) is bool
     assert f is not b
+
+
+@given(st.booleans(), st.booleans())
+def test_and(b0: bool, b1: bool) -> None:
+    f = interpret(LTLAnd(LTLVariable(b0), LTLVariable(b1)))
+    assert type(f) is bool
+    assert f is (b0 and b1)
 
 
 @given(st.booleans(), st.booleans())

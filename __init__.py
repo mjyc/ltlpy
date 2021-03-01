@@ -1,6 +1,6 @@
 from typing import cast, Union
 
-LTLFormula = Union["LTLVariable", "LTLNot", "LTLOr"]
+LTLFormula = Union["LTLVariable", "LTLNot", "LTLAnd", "LTLOr"]
 
 
 class LTLVariable:
@@ -11,6 +11,12 @@ class LTLVariable:
 class LTLNot:
     def __init__(self, value: LTLFormula) -> None:
         self.value = value
+
+
+class LTLAnd:
+    def __init__(self, left: LTLFormula, right: LTLFormula) -> None:
+        self.left = left
+        self.right = right
 
 
 class LTLOr:
@@ -27,6 +33,16 @@ def interpret(formula: LTLFormula) -> Union[LTLFormula, bool]:
         if type(f) is bool:
             return not f
         return LTLNot(cast(LTLFormula, f))
+    if type(formula) is LTLAnd:
+        f0 = interpret(cast(LTLAnd, formula).left)
+        f1 = interpret(cast(LTLAnd, formula).right)
+        if f0 is False:
+            return False
+        if f1 is False:
+            return False
+        if f0 is True and f1 is True:
+            return True
+        return LTLAnd(cast(LTLFormula, f0), cast(LTLFormula, f1))
     if type(formula) is LTLOr:
         f0 = interpret(cast(LTLOr, formula).left)
         f1 = interpret(cast(LTLOr, formula).right)
