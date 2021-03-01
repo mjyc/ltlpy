@@ -9,6 +9,7 @@ from ltlpy import (
     LTLOr,
     LTLNext,
     LTLEventually,
+    LTLAlways,
     ltl_interpret,
 )
 
@@ -86,5 +87,26 @@ def test_eventually(lst: List[bool]) -> None:
 
     if type(f) is LTLEventually:
         f = False
+
+    assert f is expected
+
+
+@given(st.lists(st.booleans()))
+def test_always(lst: List[bool]) -> None:
+    expected = all(lst)
+
+    f: Union[LTLFormula, bool] = LTLAlways(LTLVariable("a"))
+    for b in lst:
+        if type(f) is bool:
+            break
+
+        def lookup(name: str) -> bool:
+            # name does not matter as there is only one variable
+            return b
+
+        f = ltl_interpret(cast(LTLFormula, f), lookup)
+
+    if type(f) is LTLAlways:
+        f = True
 
     assert f is expected
