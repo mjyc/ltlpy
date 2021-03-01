@@ -4,5 +4,12 @@ from ltlpy import LTLVariable, interpret
 
 @given(st.booleans())
 def test_var(b: bool) -> None:
-    f = LTLVariable(b)
-    assert interpret(f) is b
+    f = interpret(LTLVariable(b))
+    assert f is b
+
+
+@given(st.booleans())
+def test_not(b: bool) -> None:
+    f = interpret(LTLVariable(b))
+    assert type(f) is bool
+    assert f is not b
