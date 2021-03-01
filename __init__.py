@@ -1,27 +1,14 @@
 from typing import Optional, Union
-from enum import Enum
+
+LTLFormula = Union["LTLVariable"]
 
 
-class LTLOperators(Enum):
-    VARIABLE = 'variable'
-    NOT = 'not'
-    AND = 'and'
-    OR = 'or'
-    NEXT = 'next'
-    ALWAYS = 'always'
-    EVENTUALLY = 'eventually'
-
-
-class LTLFormula:
-    def __init__(
-        self, op: LTLOperators, value: Optional[Union["LTLFormula", bool]]
-    ) -> None:
-        self.op = op
+class LTLVariable:
+    def __init__(self, value: bool) -> None:
         self.value = value
 
 
-def interpret(formula: LTLFormula) -> Union[LTLFormula, bool, None]:
-    if formula.op is LTLOperators.VARIABLE:
+def interpret(formula: LTLFormula) -> Optional[bool]:
+    if type(formula) is LTLVariable:
         return formula.value
-
     return None
