@@ -17,4 +17,11 @@ class LTLFormula:
         self, op: LTLOperators, value: Optional[Union["LTLFormula", bool]]
     ) -> None:
         self.op = op
-        self.next = value
+        self.value = value
+
+
+def interpret(formula: LTLFormula) -> Union[LTLFormula, bool, None]:
+    if formula.op is LTLOperators.VARIABLE:
+        return formula.value
+
+    return None
