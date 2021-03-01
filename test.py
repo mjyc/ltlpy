@@ -1,4 +1,4 @@
-from typing import List, Union, cast
+from typing import Callable, Dict, List, Union, cast
 
 import pytest
 from hypothesis import given
@@ -17,29 +17,35 @@ from ltlpy import (
 )
 
 
+def fail_get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
+    pytest.fail("Unexpected function call")
+    return {}
+
+
 @given(st.booleans())
 def test_bool(b: bool) -> None:
-    f = ltl_interpret(LTLVariable(b), lambda _: pytest.fail("Unexpected lookup call"))
+
+    f = ltl_interpret(LTLVariable(b), fail_get_lookup_table)
     assert type(f) is bool
     assert f is b
 
 
 @given(st.booleans())
 def test_var(b: bool) -> None:
-    def lookup(name: str) -> bool:
-        return name == "a"
+    formula = LTLVariable("a")
 
-    formula = LTLVariable("a" if b else "b")
-    f = ltl_interpret(formula, lookup)
+    def get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
+        lookup_table: Dict[str, Union[bool, Callable[[], None]]] = {"a": b}
+        return lookup_table
+
+    f = ltl_interpret(formula, get_lookup_table)
     assert type(f) is bool
     assert f is b
 
 
 @given(st.booleans())
 def test_not(b: bool) -> None:
-    f = ltl_interpret(
-        LTLNot(LTLVariable(b)), lambda _: pytest.fail("Unexpected lookup call")
-    )
+    f = ltl_interpret(LTLNot(LTLVariable(b)), fail_get_lookup_table)
     assert type(f) is bool
     assert f is not b
 
@@ -48,7 +54,7 @@ def test_not(b: bool) -> None:
 def test_and(b0: bool, b1: bool) -> None:
     f = ltl_interpret(
         LTLAnd(LTLVariable(b0), LTLVariable(b1)),
-        lambda _: pytest.fail("Unexpected lookup call"),
+        fail_get_lookup_table,
     )
     assert type(f) is bool
     assert f is (b0 and b1)
@@ -58,7 +64,7 @@ def test_and(b0: bool, b1: bool) -> None:
 def test_or(b0: bool, b1: bool) -> None:
     f = ltl_interpret(
         LTLOr(LTLVariable(b0), LTLVariable(b1)),
-        lambda _: pytest.fail("Unexpected lookup call"),
+        fail_get_lookup_table,
     )
     assert type(f) is bool
     assert f is (b0 or b1)
@@ -66,9 +72,7 @@ def test_or(b0: bool, b1: bool) -> None:
 
 @given(st.booleans())
 def test_next(b: bool) -> None:
-    f = ltl_interpret(
-        LTLNext(LTLVariable(b)), lambda _: pytest.fail("Unexpected lookup call")
-    )
+    f = ltl_interpret(LTLNext(LTLVariable(b)), fail_get_lookup_table)
     assert type(f) is bool
     assert f is b
 
@@ -82,11 +86,11 @@ def test_eventually(lst: List[bool]) -> None:
         if type(f) is bool:
             break
 
-        def lookup(name: str) -> bool:
-            # name does not matter as there is only one variable
-            return b
+        def get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
+            lookup_table: Dict[str, Union[bool, Callable[[], None]]] = {"a": b}
+            return lookup_table
 
-        f = ltl_interpret(cast(LTLFormula, f), lookup)
+        f = ltl_interpret(cast(LTLFormula, f), get_lookup_table)
 
     if type(f) is LTLEventually:
         f = False
@@ -103,11 +107,11 @@ def test_always(lst: List[bool]) -> None:
         if type(f) is bool:
             break
 
-        def lookup(name: str) -> bool:
-            # name does not matter as there is only one variable
-            return b
+        def get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
+            lookup_table: Dict[str, Union[bool, Callable[[], None]]] = {"a": b}
+            return lookup_table
 
-        f = ltl_interpret(cast(LTLFormula, f), lookup)
+        f = ltl_interpret(cast(LTLFormula, f), get_lookup_table)
 
     if type(f) is LTLAlways:
         f = True
