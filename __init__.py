@@ -38,7 +38,7 @@ class LTLEventually:
 
 
 def ltl_interpret(
-    formula: LTLFormula, lookup: Callable[[str], bool] = lambda a: True
+    formula: LTLFormula, lookup: Callable[[str], bool]
 ) -> Union[LTLFormula, bool, str]:
     if type(formula) is LTLVariable:
         value = cast(LTLVariable, formula).value
