@@ -1,5 +1,5 @@
 from hypothesis import given, strategies as st
-from ltlpy import LTLVariable, interpret
+from ltlpy import LTLVariable, LTLNot, interpret
 
 
 @given(st.booleans())
@@ -10,6 +10,6 @@ def test_var(b: bool) -> None:
 
 @given(st.booleans())
 def test_not(b: bool) -> None:
-    f = interpret(LTLVariable(b))
+    f = interpret(LTLNot(LTLVariable(b)))
     assert type(f) is bool
     assert f is not b
