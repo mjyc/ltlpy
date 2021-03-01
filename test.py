@@ -1,6 +1,16 @@
 import pytest
+from typing import cast, List, Union
 from hypothesis import given, strategies as st
-from ltlpy import LTLVariable, LTLNot, LTLAnd, LTLOr, LTLNext, ltl_interpret
+from ltlpy import (
+    LTLFormula,
+    LTLVariable,
+    LTLNot,
+    LTLAnd,
+    LTLOr,
+    LTLNext,
+    LTLEventually,
+    ltl_interpret,
+)
 
 
 @given(st.booleans())
@@ -57,3 +67,24 @@ def test_next(b: bool) -> None:
     )
     assert type(f) is bool
     assert f is b
+
+
+@given(st.lists(st.booleans()))
+def test_eventually(lst: List[bool]) -> None:
+    expected = any(lst)
+
+    f: Union[LTLFormula, bool] = LTLEventually(LTLVariable("a"))
+    for b in lst:
+        if type(f) is bool:
+            break
+
+        def lookup(name: str) -> bool:
+            # name does not matter as there is only one variable
+            return b
+
+        f = ltl_interpret(cast(LTLFormula, f), lookup)
+
+    if type(f) is LTLEventually:
+        f = False
+
+    assert f is expected

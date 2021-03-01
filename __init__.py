@@ -39,11 +39,11 @@ class LTLEventually:
 
 def ltl_interpret(
     formula: LTLFormula, lookup: Callable[[str], bool]
-) -> Union[LTLFormula, bool, str]:
+) -> Union[LTLFormula, bool]:
     if type(formula) is LTLVariable:
         value = cast(LTLVariable, formula).value
         if type(value) is bool:
-            return value
+            return cast(bool, value)
         return lookup(cast(str, value))
     if type(formula) is LTLNot:
         f = ltl_interpret(cast(LTLNot, formula).value, lookup)
