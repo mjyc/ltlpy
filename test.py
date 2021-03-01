@@ -4,8 +4,19 @@ from ltlpy import LTLVariable, LTLNot, LTLAnd, LTLOr, LTLNext, ltl_interpret
 
 
 @given(st.booleans())
-def test_var(b: bool) -> None:
+def test_bool(b: bool) -> None:
     f = ltl_interpret(LTLVariable(b), lambda _: pytest.fail("Unexpected lookup call"))
+    assert type(f) is bool
+    assert f is b
+
+
+@given(st.booleans())
+def test_var(b: bool) -> None:
+    def lookup(name: str) -> bool:
+        return name == "a"
+
+    formula = LTLVariable("a" if b else "b")
+    f = ltl_interpret(formula, lookup)
     assert type(f) is bool
     assert f is b
 
