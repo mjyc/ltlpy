@@ -14,6 +14,7 @@ from ltlpy import (
     LTLOr,
     LTLVariable,
     ltl_interpret,
+    get_variable_names,
 )
 
 
@@ -24,7 +25,6 @@ def fail_get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
 
 @given(st.booleans())
 def test_bool(b: bool) -> None:
-
     f = ltl_interpret(LTLVariable(b), fail_get_lookup_table)
     assert type(f) is bool
     assert f is b
@@ -119,7 +119,7 @@ def test_always(lst: List[bool]) -> None:
 
 
 def test_nested_eventually_1() -> None:
-    spec = LTLEventually(
+    formula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
             LTLEventually(
@@ -134,7 +134,7 @@ def test_nested_eventually_1() -> None:
     def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
         return {"a": True}
 
-    f: Union[LTLFormula, bool] = spec
+    f: Union[LTLFormula, bool] = formula
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
@@ -143,7 +143,7 @@ def test_nested_eventually_1() -> None:
 
 
 def test_nested_eventually_2() -> None:
-    spec = LTLEventually(
+    formula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
             LTLNext(
@@ -160,7 +160,7 @@ def test_nested_eventually_2() -> None:
     def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
         return {"a": True}
 
-    f: Union[LTLFormula, bool] = spec
+    f: Union[LTLFormula, bool] = formula
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
@@ -172,7 +172,7 @@ def test_nested_eventually_2() -> None:
 
 
 def test_nested_eventually_3() -> None:
-    spec = LTLEventually(
+    formula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
             LTLEventually(
@@ -190,7 +190,7 @@ def test_nested_eventually_3() -> None:
     def get_lookup_table_b_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
         return {"b": True}
 
-    f: Union[LTLFormula, bool] = spec
+    f: Union[LTLFormula, bool] = formula
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
@@ -198,3 +198,18 @@ def test_nested_eventually_3() -> None:
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
     assert type(f) is bool
     assert f
+
+
+def test_get_variable_names() -> None:
+    expected = ["a", "b"]
+    formula: LTLFormula = LTLEventually(
+        LTLAnd(
+            LTLVariable("a"),
+            LTLEventually(
+                LTLVariable("b"),
+            ),
+        ),
+    )
+    actual = get_variable_names(formula)
+
+    assert actual == expected

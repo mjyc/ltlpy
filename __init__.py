@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Union, cast
+from typing import Callable, Dict, List, Optional, Union, cast
 
 LTLFormula = Union[
     "LTLVariable",
@@ -205,5 +205,42 @@ def ltl_interpret(
         if f is cast(LTLAlways, formula).value:
             return formula
         return LTLAnd(cast(LTLFormula, f), formula)
+
+    raise Exception("Invalid formula", formula)
+
+
+def get_variable_names(
+    formula: LTLFormula, names: Optional[List[str]] = None
+) -> List[str]:
+    if names is None:
+        names = []
+
+    if type(formula) is LTLVariable:
+        value = cast(LTLVariable, formula).value
+        if type(value) is bool:
+            return names
+        variable_name = cast(str, value)
+        names.append(variable_name)
+        return names
+    if type(formula) is LTLNot:
+        get_variable_names(cast(LTLNot, formula).value, names)
+        return names
+    if type(formula) is LTLAnd:
+        get_variable_names(cast(LTLAnd, formula).left, names)
+        get_variable_names(cast(LTLAnd, formula).right, names)
+        return names
+    if type(formula) is LTLOr:
+        get_variable_names(cast(LTLOr, formula).left, names)
+        get_variable_names(cast(LTLOr, formula).right, names)
+        return names
+    if type(formula) is LTLNext:
+        get_variable_names(cast(LTLNext, formula).value, names)
+        return names
+    if type(formula) is LTLEventually:
+        get_variable_names(cast(LTLEventually, formula).value, names)
+        return names
+    if type(formula) is LTLAlways:
+        get_variable_names(cast(LTLAlways, formula).value, names)
+        return names
 
     raise Exception("Invalid formula", formula)
