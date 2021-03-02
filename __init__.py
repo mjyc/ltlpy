@@ -19,7 +19,7 @@ class LTLVariable:
         if type(self.value) is bool:
             return f"LTLVariable({self.value})"
         else:
-            return f"LTLVariable(\"{self.value}\")"
+            return f'LTLVariable("{self.value}")'
 
     def __eq__(self, other: object) -> bool:
         if type(other) is LTLVariable:
@@ -139,6 +139,8 @@ def ltl_interpret(
         return LTLNot(cast(LTLFormula, f))
     if type(formula) is LTLAnd:
         f0 = ltl_interpret(cast(LTLAnd, formula).left, get_lookup_table)
+        if f0 is False:
+            return False
         f1 = ltl_interpret(cast(LTLAnd, formula).right, get_lookup_table)
         if f0 is False or f1 is False:
             return False
@@ -151,8 +153,10 @@ def ltl_interpret(
         return LTLAnd(cast(LTLFormula, f0), cast(LTLFormula, f1))
     if type(formula) is LTLOr:
         f0 = ltl_interpret(cast(LTLOr, formula).left, get_lookup_table)
+        if f0 is True:
+            return True
         f1 = ltl_interpret(cast(LTLOr, formula).right, get_lookup_table)
-        if f0 is True or f1 is True:
+        if f1 is True:
             return True
         if f0 is False and f1 is False:
             return False
