@@ -17,7 +17,7 @@ from ltlpy import (
 )
 
 
-def fail_get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
+def fail_get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
     pytest.fail("Unexpected function call")
     return {}
 
@@ -34,8 +34,8 @@ def test_bool(b: bool) -> None:
 def test_var(b: bool) -> None:
     formula = LTLVariable("a")
 
-    def get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
-        lookup_table: Dict[str, Union[bool, Callable[[], None]]] = {"a": b}
+    def get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        lookup_table: Dict[str, Union[bool, Callable[[], bool]]] = {"a": b}
         return lookup_table
 
     f = ltl_interpret(formula, get_lookup_table)
@@ -73,8 +73,7 @@ def test_or(b0: bool, b1: bool) -> None:
 @given(st.booleans())
 def test_next(b: bool) -> None:
     f = ltl_interpret(LTLNext(LTLVariable(b)), fail_get_lookup_table)
-    assert type(f) is bool
-    assert f is b
+    assert f == LTLVariable(b)
 
 
 @given(st.lists(st.booleans()))
@@ -86,8 +85,8 @@ def test_eventually(lst: List[bool]) -> None:
         if type(f) is bool:
             break
 
-        def get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
-            lookup_table: Dict[str, Union[bool, Callable[[], None]]] = {"a": b}
+        def get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
+            lookup_table: Dict[str, Union[bool, Callable[[], bool]]] = {"a": b}
             return lookup_table
 
         f = ltl_interpret(cast(LTLFormula, f), get_lookup_table)
@@ -107,8 +106,8 @@ def test_always(lst: List[bool]) -> None:
         if type(f) is bool:
             break
 
-        def get_lookup_table() -> Dict[str, Union[bool, Callable[[], None]]]:
-            lookup_table: Dict[str, Union[bool, Callable[[], None]]] = {"a": b}
+        def get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
+            lookup_table: Dict[str, Union[bool, Callable[[], bool]]] = {"a": b}
             return lookup_table
 
         f = ltl_interpret(cast(LTLFormula, f), get_lookup_table)
@@ -117,3 +116,85 @@ def test_always(lst: List[bool]) -> None:
         f = True
 
     assert f is expected
+
+
+def test_nested_eventually_1() -> None:
+    spec = LTLEventually(
+        LTLAnd(
+            LTLVariable("a"),
+            LTLEventually(
+                LTLVariable("a"),
+            ),
+        ),
+    )
+
+    def get_lookup_table_a_false() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": False}
+
+    def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": True}
+
+    f: Union[LTLFormula, bool] = spec
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    assert type(f) is bool
+    assert f
+
+
+def test_nested_eventually_2() -> None:
+    spec = LTLEventually(
+        LTLAnd(
+            LTLVariable("a"),
+            LTLNext(
+                LTLEventually(
+                    LTLVariable("a"),
+                )
+            ),
+        ),
+    )
+
+    def get_lookup_table_a_false() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": False}
+
+    def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": True}
+
+    f: Union[LTLFormula, bool] = spec
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    assert type(f) is bool
+    assert f
+
+
+def test_nested_eventually_3() -> None:
+    spec = LTLEventually(
+        LTLAnd(
+            LTLVariable("a"),
+            LTLEventually(
+                LTLVariable("b"),
+            ),
+        ),
+    )
+
+    def get_lookup_table_a_false() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": False}
+
+    def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": True}
+
+    def get_lookup_table_b_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"b": True}
+
+    f: Union[LTLFormula, bool] = spec
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
+    assert type(f) is bool
+    assert f
