@@ -139,32 +139,41 @@ def ltl_interpret(
         return LTLNot(cast(LTLFormula, f))
     if type(formula) is LTLAnd:
         f0 = ltl_interpret(cast(LTLAnd, formula).left, get_lookup_table)
-        if f0 is False:
+        if f0 is False:  # skip evaluating right
             return False
         f1 = ltl_interpret(cast(LTLAnd, formula).right, get_lookup_table)
-        if f0 is False or f1 is False:
+        if f1 is False:
             return False
         if f0 is True and f1 is True:
             return True
-        if f0 is True:
+        if f0 is True:  # prune left
             return cast(LTLFormula, f1)
-        if f1 is True:
+        if f1 is True:  # prune right
             return cast(LTLFormula, f0)
+        # prune repetitive branches in certain nested LTLAnd cases
+        if type(f0) is LTLOr and cast(LTLOr, f0).left == f1:
+            return LTLAnd(cast(LTLAnd, f0).right, cast(LTLFormula, f1))
+        if type(f0) is LTLAnd and cast(LTLAnd, f0).right == f1:
+            return LTLAnd(cast(LTLAnd, f0).left, cast(LTLFormula, f1))
+        if type(f1) is LTLAnd and cast(LTLAnd, f1).left == f0:
+            return LTLAnd(cast(LTLFormula, f0), cast(LTLAnd, f1).right)
+        if type(f1) is LTLAnd and cast(LTLAnd, f1).right == f0:
+            return LTLAnd(cast(LTLFormula, f0), cast(LTLAnd, f1).left)
         return LTLAnd(cast(LTLFormula, f0), cast(LTLFormula, f1))
     if type(formula) is LTLOr:
         f0 = ltl_interpret(cast(LTLOr, formula).left, get_lookup_table)
-        if f0 is True:
+        if f0 is True:  # skip evaluating right
             return True
         f1 = ltl_interpret(cast(LTLOr, formula).right, get_lookup_table)
         if f1 is True:
             return True
         if f0 is False and f1 is False:
             return False
-        if f0 is False:
+        if f0 is False:  # prune left
             return cast(LTLFormula, f1)
-        if f1 is False:
+        if f1 is False:  # prune left
             return cast(LTLFormula, f0)
-        # prune branches
+        # prune repetitive branches in certain nested LTLOr cases
         if type(f0) is LTLOr and cast(LTLOr, f0).left == f1:
             return LTLOr(cast(LTLOr, f0).right, cast(LTLFormula, f1))
         if type(f0) is LTLOr and cast(LTLOr, f0).right == f1:
@@ -182,7 +191,7 @@ def ltl_interpret(
             return True
         if f is False:
             return formula
-        # prune branches
+        # remove nested eventually
         if f is cast(LTLEventually, formula).value:
             return formula
         return LTLOr(cast(LTLFormula, f), formula)
@@ -192,7 +201,7 @@ def ltl_interpret(
             return False
         if f is True:
             return formula
-        # prune branches
+        # remove nested always
         if f is cast(LTLAlways, formula).value:
             return formula
         return LTLAnd(cast(LTLFormula, f), formula)
