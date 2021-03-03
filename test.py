@@ -13,8 +13,8 @@ from ltlpy import (
     LTLNot,
     LTLOr,
     LTLVariable,
-    ltl_interpret,
     get_variable_names,
+    ltl_interpret,
 )
 
 
