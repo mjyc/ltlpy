@@ -12,6 +12,7 @@ from ltlpy import (
     LTLNext,
     LTLNot,
     LTLOr,
+    LTLUntil,
     LTLVariable,
     get_variable_names,
     ltl_interpret,
@@ -202,6 +203,36 @@ def test_nested_eventually_3() -> None:
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
     assert f
+
+
+# TODO: finish it
+def test_nested_until() -> None:
+    # formula = LTLUntil(
+    #     LTLAnd(
+    #         LTLVariable("a"),
+    #         LTLEventually(
+    #             LTLVariable("b"),
+    #         ),
+    #     ),
+    # )
+
+    # def get_lookup_table_a_false() -> Dict[str, Union[bool, Callable[[], bool]]]:
+    #     return {"a": False}
+
+    # def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+    #     return {"a": True}
+
+    # def get_lookup_table_b_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+    #     return {"b": True}
+
+    # f: Union[LTLFormula, bool] = formula
+    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
+    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
+    # assert f
+    assert False
 
 
 def test_get_variable_names() -> None:
