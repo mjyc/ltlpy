@@ -5,6 +5,7 @@ LTLFormula = Union[
     "LTLNot",
     "LTLAnd",
     "LTLOr",
+    "LTLIf",
     "LTLNext",
     "LTLEventually",
     "LTLAlways",
@@ -70,6 +71,23 @@ class LTLOr:
             return (
                 self.left == cast(LTLOr, other).left
                 and self.right == cast(LTLOr, other).right
+            )
+        return False
+
+
+class LTLIf:
+    def __init__(self, left: LTLFormula, right: LTLFormula) -> None:
+        self.left = left
+        self.right = right
+
+    def __str__(self) -> str:
+        return f"LTLIf({str(self.left)}, {str(self.right)})"
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) is LTLIf:
+            return (
+                self.left == cast(LTLIf, other).left
+                and self.right == cast(LTLIf, other).right
             )
         return False
 
@@ -184,6 +202,11 @@ def ltl_interpret(
         if type(f1) is LTLOr and cast(LTLOr, f1).right == f0:
             return LTLOr(cast(LTLFormula, f0), cast(LTLOr, f1).left)
         return LTLOr(cast(LTLFormula, f0), cast(LTLFormula, f1))
+    if type(formula) is LTLIf:
+        return ltl_interpret(
+            LTLOr(LTLNot(cast(LTLIf, formula).left), cast(LTLIf, formula).right),
+            get_lookup_table,
+        )
     if type(formula) is LTLNext:
         return cast(LTLNext, formula).value
     if type(formula) is LTLEventually:
@@ -233,6 +256,10 @@ def get_variable_names(
     if type(formula) is LTLOr:
         get_variable_names(cast(LTLOr, formula).left, names)
         get_variable_names(cast(LTLOr, formula).right, names)
+        return names
+    if type(formula) is LTLIf:
+        get_variable_names(cast(LTLIf, formula).left, names)
+        get_variable_names(cast(LTLIf, formula).right, names)
         return names
     if type(formula) is LTLNext:
         get_variable_names(cast(LTLNext, formula).value, names)

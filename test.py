@@ -12,6 +12,7 @@ from ltlpy import (
     LTLNext,
     LTLNot,
     LTLOr,
+    LTLIf,
     LTLVariable,
     get_variable_names,
     ltl_interpret,
@@ -63,6 +64,15 @@ def test_or(b0: bool, b1: bool) -> None:
         fail_get_lookup_table,
     )
     assert f is (b0 or b1)
+
+
+@given(st.booleans(), st.booleans())
+def test_if(b0: bool, b1: bool) -> None:
+    f = ltl_interpret(
+        LTLIf(LTLVariable(b0), LTLVariable(b1)),
+        fail_get_lookup_table,
+    )
+    assert f is (not b0 or b1)
 
 
 @given(st.booleans())
