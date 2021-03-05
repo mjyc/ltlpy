@@ -152,15 +152,15 @@ def ltl_interpret(
 
         return formula
     if type(formula) is LTLNot:
-        f = ltl_interpret(cast(LTLNot, formula).value, get_lookup_table)
+        f = ltl_interpret(cast(LTLNot, formula).value, get_lookup_table, is_final)
         if type(f) is bool:
             return not f
         return LTLNot(cast(LTLFormula, f))
     if type(formula) is LTLAnd:
-        f0 = ltl_interpret(cast(LTLAnd, formula).left, get_lookup_table)
+        f0 = ltl_interpret(cast(LTLAnd, formula).left, get_lookup_table, is_final)
         if f0 is False:  # skip evaluating right
             return False
-        f1 = ltl_interpret(cast(LTLAnd, formula).right, get_lookup_table)
+        f1 = ltl_interpret(cast(LTLAnd, formula).right, get_lookup_table, is_final)
         if f1 is False:
             return False
         if f0 is True and f1 is True:
@@ -180,10 +180,10 @@ def ltl_interpret(
             return LTLAnd(cast(LTLFormula, f0), cast(LTLAnd, f1).left)
         return LTLAnd(cast(LTLFormula, f0), cast(LTLFormula, f1))
     if type(formula) is LTLOr:
-        f0 = ltl_interpret(cast(LTLOr, formula).left, get_lookup_table)
+        f0 = ltl_interpret(cast(LTLOr, formula).left, get_lookup_table, is_final)
         if f0 is True:  # skip evaluating right
             return True
-        f1 = ltl_interpret(cast(LTLOr, formula).right, get_lookup_table)
+        f1 = ltl_interpret(cast(LTLOr, formula).right, get_lookup_table, is_final)
         if f1 is True:
             return True
         if f0 is False and f1 is False:
@@ -206,11 +206,14 @@ def ltl_interpret(
         return ltl_interpret(
             LTLOr(LTLNot(cast(LTLIf, formula).left), cast(LTLIf, formula).right),
             get_lookup_table,
+            is_final,
         )
     if type(formula) is LTLNext:
         return cast(LTLNext, formula).value
     if type(formula) is LTLEventually:
-        f = ltl_interpret(cast(LTLEventually, formula).value, get_lookup_table)
+        f = ltl_interpret(
+            cast(LTLEventually, formula).value, get_lookup_table, is_final
+        )
         if f is True:
             return True
         if f is False:
@@ -220,7 +223,7 @@ def ltl_interpret(
             return formula
         return LTLOr(cast(LTLFormula, f), formula)
     if type(formula) is LTLAlways:
-        f = ltl_interpret(cast(LTLAlways, formula).value, get_lookup_table)
+        f = ltl_interpret(cast(LTLAlways, formula).value, get_lookup_table, is_final)
         if f is False:
             return False
         if f is True:
