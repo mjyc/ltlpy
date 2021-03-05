@@ -239,6 +239,7 @@ def ltl_interpret(
         # remove nested eventually
         if f is cast(LTLEventually, formula).value:
             return formula
+        # TODO: handle the is_final=True case
         return LTLOr(cast(LTLFormula, f), formula)
     if type(formula) is LTLAlways:
         f = ltl_interpret(cast(LTLAlways, formula).value, get_lookup_table, is_final)
@@ -249,6 +250,7 @@ def ltl_interpret(
         # remove nested always
         if f is cast(LTLAlways, formula).value:
             return formula
+        # TODO: handle the is_final=True case
         return LTLAnd(cast(LTLFormula, f), formula)
 
     if type(formula) is LTLUntil:
@@ -261,6 +263,9 @@ def ltl_interpret(
         if f0 is False:
             return False
 
+        # TODO: better handle the is_final case
+        if f0 is True and is_final is True:
+            return True
         new_left = (
             cast(LTLUntil, formula).left
             if f0 is True
@@ -312,6 +317,10 @@ def get_variable_names(
         return names
     if type(formula) is LTLAlways:
         get_variable_names(cast(LTLAlways, formula).value, names)
+        return names
+    if type(formula) is LTLUntil:
+        get_variable_names(cast(LTLUntil, formula).left, names)
+        get_variable_names(cast(LTLIf, formula).right, names)
         return names
 
     raise Exception("Invalid formula", formula)
