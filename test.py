@@ -97,6 +97,12 @@ def test_eventually(lst: List[bool]) -> None:
     assert f is expected
 
 
+def test_eventually_with_is_final() -> None:
+    formula = LTLEventually(LTLVariable("a"))
+    f = ltl_interpret(formula, lambda: {"a": False}, is_final=True)
+    assert f is False
+
+
 @given(st.lists(st.booleans()))
 def test_always(lst: List[bool]) -> None:
     expected = all(lst)
@@ -116,6 +122,12 @@ def test_always(lst: List[bool]) -> None:
         f = True
 
     assert f is expected
+
+
+def test_always_with_is_final() -> None:
+    formula = LTLAlways(LTLVariable("a"))
+    f = ltl_interpret(formula, lambda: {"a": True}, is_final=True)
+    assert f is True
 
 
 def test_nested_eventually_1() -> None:

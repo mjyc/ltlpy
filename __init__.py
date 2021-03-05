@@ -116,6 +116,7 @@ class LTLAlways:
 def ltl_interpret(
     formula: LTLFormula,
     get_lookup_table: Callable[[], Dict[str, Union[bool, Callable[[], bool]]]],
+    is_final: Optional[bool] = False,
 ) -> Union[LTLFormula, bool]:
     if type(formula) is LTLVariable:
         value = cast(LTLVariable, formula).value
@@ -190,7 +191,7 @@ def ltl_interpret(
         if f is True:
             return True
         if f is False:
-            return formula
+            return formula if not is_final else False
         # remove nested eventually
         if f is cast(LTLEventually, formula).value:
             return formula
@@ -200,7 +201,7 @@ def ltl_interpret(
         if f is False:
             return False
         if f is True:
-            return formula
+            return formula if not is_final else True
         # remove nested always
         if f is cast(LTLAlways, formula).value:
             return formula
