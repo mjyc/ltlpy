@@ -103,13 +103,13 @@ def test_eventually(lst: List[bool]) -> None:
     assert f is expected
 
 
-def test_eventually_with_is_final_1() -> None:
+def test_eventually_with_is_final() -> None:
     formula = LTLEventually(LTLVariable("a"))
     f = ltl_interpret(formula, lambda: {"a": False}, is_final=True)
     assert f is False
 
 
-def test_eventually_with_is_final_2() -> None:
+def test_eventually_nested_with_is_final() -> None:
     formula = LTLEventually(LTLEventually(LTLVariable("a")))
     f = ltl_interpret(formula, lambda: {"a": False}, is_final=True)
     assert f is False
@@ -148,7 +148,7 @@ def test_always_with_is_final_2() -> None:
     assert f is True
 
 
-def test_nested_eventually_1() -> None:
+def test_eventually_nested_1() -> None:
     formula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
@@ -171,7 +171,7 @@ def test_nested_eventually_1() -> None:
     assert f
 
 
-def test_nested_eventually_2() -> None:
+def test_eventually_nested_2() -> None:
     formula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
@@ -199,7 +199,7 @@ def test_nested_eventually_2() -> None:
     assert f
 
 
-def test_nested_eventually_3() -> None:
+def test_eventually_nested_3() -> None:
     formula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
