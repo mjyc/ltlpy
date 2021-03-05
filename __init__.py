@@ -9,6 +9,7 @@ LTLFormula = Union[
     "LTLNext",
     "LTLEventually",
     "LTLAlways",
+    "LTLUntil",
 ]
 
 
@@ -131,6 +132,23 @@ class LTLAlways:
         return False
 
 
+class LTLUntil:
+    def __init__(self, left: LTLFormula, right: LTLFormula) -> None:
+        self.left = left
+        self.right = right
+
+    def __str__(self) -> str:
+        return f"LTLUntil({str(self.left), str(self.right)})"
+
+    def __eq__(self, other: object) -> bool:
+        if type(other) is LTLUntil:
+            return (
+                self.left == cast(LTLUntil, other).left
+                and self.right == cast(LTLUntil, other).right
+            )
+        return False
+
+
 def ltl_interpret(
     formula: LTLFormula,
     get_lookup_table: Callable[[], Dict[str, Union[bool, Callable[[], bool]]]],
@@ -224,6 +242,18 @@ def ltl_interpret(
         return LTLOr(cast(LTLFormula, f), formula)
     if type(formula) is LTLAlways:
         f = ltl_interpret(cast(LTLAlways, formula).value, get_lookup_table, is_final)
+        if f is False:
+            return False
+        if f is True:
+            return formula if not is_final else True
+        # remove nested always
+        if f is cast(LTLAlways, formula).value:
+            return formula
+        return LTLAnd(cast(LTLFormula, f), formula)
+
+    # TODO: finish it
+    if type(formula) is LTLUntil:
+        f0 = ltl_interpret(cast(LTLUntil, formula).left, get_lookup_table)
         if f is False:
             return False
         if f is True:
