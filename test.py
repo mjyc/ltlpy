@@ -26,7 +26,6 @@ def fail_get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
 @given(st.booleans())
 def test_bool(b: bool) -> None:
     f = ltl_interpret(LTLVariable(b), fail_get_lookup_table)
-    assert type(f) is bool
     assert f is b
 
 
@@ -39,14 +38,12 @@ def test_var(b: bool) -> None:
         return lookup_table
 
     f = ltl_interpret(formula, get_lookup_table)
-    assert type(f) is bool
     assert f is b
 
 
 @given(st.booleans())
 def test_not(b: bool) -> None:
     f = ltl_interpret(LTLNot(LTLVariable(b)), fail_get_lookup_table)
-    assert type(f) is bool
     assert f is not b
 
 
@@ -56,7 +53,6 @@ def test_and(b0: bool, b1: bool) -> None:
         LTLAnd(LTLVariable(b0), LTLVariable(b1)),
         fail_get_lookup_table,
     )
-    assert type(f) is bool
     assert f is (b0 and b1)
 
 
@@ -66,7 +62,6 @@ def test_or(b0: bool, b1: bool) -> None:
         LTLOr(LTLVariable(b0), LTLVariable(b1)),
         fail_get_lookup_table,
     )
-    assert type(f) is bool
     assert f is (b0 or b1)
 
 
@@ -150,7 +145,6 @@ def test_nested_eventually_1() -> None:
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
-    assert type(f) is bool
     assert f
 
 
@@ -179,7 +173,6 @@ def test_nested_eventually_2() -> None:
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
-    assert type(f) is bool
     assert f
 
 
@@ -208,12 +201,12 @@ def test_nested_eventually_3() -> None:
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
     f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
-    assert type(f) is bool
     assert f
 
 
 def test_get_variable_names() -> None:
     expected = ["a", "b"]
+
     formula: LTLFormula = LTLEventually(
         LTLAnd(
             LTLVariable("a"),
