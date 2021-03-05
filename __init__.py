@@ -251,17 +251,27 @@ def ltl_interpret(
             return formula
         return LTLAnd(cast(LTLFormula, f), formula)
 
-    # TODO: finish it
     if type(formula) is LTLUntil:
-        f0 = ltl_interpret(cast(LTLUntil, formula).left, get_lookup_table)
-        if f is False:
+        left: LTLFormula = cast(LTLUntil, formula).left
+        right: LTLFormula = cast(LTLUntil, formula).right
+        f1 = ltl_interpret(right, get_lookup_table, is_final)
+        if f1 is True:
+            return True
+        f0 = ltl_interpret(left, get_lookup_table, is_final)
+        if f0 is False:
             return False
-        if f is True:
-            return formula if not is_final else True
-        # remove nested always
-        if f is cast(LTLAlways, formula).value:
-            return formula
-        return LTLAnd(cast(LTLFormula, f), formula)
+
+        new_left = (
+            cast(LTLUntil, formula).left
+            if f0 is True
+            else LTLAnd(cast(LTLFormula, f0), cast(LTLUntil, formula).left)
+        )
+        new_right = (
+            cast(LTLUntil, formula).right
+            if f1 is False
+            else LTLAnd(cast(LTLFormula, f1), cast(LTLUntil, formula).right)
+        )
+        return LTLUntil(new_left, new_right)
 
     raise Exception("Invalid formula", formula)
 

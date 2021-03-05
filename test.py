@@ -227,34 +227,51 @@ def test_nested_eventually_3() -> None:
     assert f
 
 
-# TODO: finish it
-def test_nested_until() -> None:
-    # formula = LTLUntil(
-    #     LTLAnd(
-    #         LTLVariable("a"),
-    #         LTLEventually(
-    #             LTLVariable("b"),
-    #         ),
-    #     ),
-    # )
+def test_until_1() -> None:
+    formula = LTLUntil(
+        LTLVariable("a"),
+        LTLVariable("b"),
+    )
 
-    # def get_lookup_table_a_false() -> Dict[str, Union[bool, Callable[[], bool]]]:
-    #     return {"a": False}
+    def get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": False, "b": False}
 
-    # def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
-    #     return {"a": True}
+    f: Union[LTLFormula, bool] = formula
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table)
+    assert not f
 
-    # def get_lookup_table_b_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
-    #     return {"b": True}
 
-    # f: Union[LTLFormula, bool] = formula
-    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
-    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_false)
-    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
-    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
-    # f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
-    # assert f
-    assert False
+def test_until_2() -> None:
+    formula = LTLUntil(
+        LTLVariable("a"),
+        LTLVariable("b"),
+    )
+
+    def get_lookup_table() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": False, "b": True}
+
+    f: Union[LTLFormula, bool] = formula
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table)
+    assert f
+
+
+def test_until_3() -> None:
+    formula = LTLUntil(
+        LTLVariable("a"),
+        LTLVariable("b"),
+    )
+
+    def get_lookup_table_a_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": True, "b": False}
+
+    def get_lookup_table_b_true() -> Dict[str, Union[bool, Callable[[], bool]]]:
+        return {"a": False, "b": True}
+
+    f: Union[LTLFormula, bool] = formula
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_a_true)
+    assert f == formula
+    f = ltl_interpret(cast(LTLFormula, f), get_lookup_table_b_true)
+    assert f
 
 
 def test_get_variable_names() -> None:
